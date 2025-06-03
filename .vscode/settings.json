@@ -9,7 +9,6 @@
         170
     ],
     "editor.bracketPairColorization.enabled": true,
-    "editor.guides.bracketPairs": "active",
     //----------------------------------------------------------------------
     // FORMAT & LINTING
     //----------------------------------------------------------------------

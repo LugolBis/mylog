@@ -5,3 +5,4 @@ edition = "2024"
 authors = ["LugolBis", "Altaks"]
 
 [dependencies]
+libc = "0.2.172"
