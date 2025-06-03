@@ -1,15 +1,21 @@
 use std::fs::OpenOptions;
 use std::io::Write;
 
+const LOG_FILE_PATH: &str = "logs.txt";
+
 #[allow(unused)]
 pub fn write_log(content: String) {
-    match  OpenOptions::new()
+    match OpenOptions::new()
         .append(true)
         .create(true)
-        .open("logs.txt")
+        .open(LOG_FILE_PATH)
     {
-        Ok(mut file) => { let _ = file.write_all(content.as_bytes()); },
-        Err(error) => { println!("Error when try to write log : {:?}",error); }
+        Ok(mut file) => {
+            let _ = file.write_all(content.as_bytes());
+        }
+        Err(error) => {
+            println!("Error when try to write log : {:?}", error);
+        }
     }
 }
 

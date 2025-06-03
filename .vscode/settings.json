@@ -1,0 +1,53 @@
+{
+    //----------------------------------------------------------------------
+    // FONT & DISPLAY
+    //----------------------------------------------------------------------
+    "editor.fontFamily": "'CaskaydiaCove Nerd Font', 'JetBrains Mono', 'Droid Sans Mono', 'monospace', monospace, 'Droid Sans Fallback'",
+    "editor.fontLigatures": true,
+    "editor.fontWeight": "normal",
+    "editor.rulers": [
+        170
+    ],
+    "editor.bracketPairColorization.enabled": true,
+    "editor.guides.bracketPairs": "active",
+    //----------------------------------------------------------------------
+    // FORMAT & LINTING
+    //----------------------------------------------------------------------
+    "editor.formatOnSave": true,
+    "files.eol": "\n",
+    "files.insertFinalNewline": true,
+    "editor.tabSize": 4,
+    "editor.detectIndentation": false,
+    "files.watcherExclude": {
+        "**/target/**": true,
+        "**/temp/**": true
+    },
+    //----------------------------------------------------------------------
+    // ENVIRONMENT
+    //----------------------------------------------------------------------
+    // https://github.com/microsoft/vscode/issues/69665
+    "terminal.integrated.experimentalRefreshOnResume": true,
+    "disable-hardware-acceleration": true,
+    "terminal.integrated.tabs.enabled": true,
+    "terminal.integrated.env.windows": {
+        "unuseful_to_maintain": "true"
+    },
+    "terminal.integrated.allowWorkspaceConfiguration": true, // This setting can be applied only in application user settings
+    //----------------------------------------------------------------------
+    // DEBUG
+    //----------------------------------------------------------------------
+    "debug.allowBreakpointsEverywhere": true,
+    //----------------------------------------------------------------------
+    // GIT
+    //----------------------------------------------------------------------
+    "git.autofetch": true,
+    "git.autofetchPeriod": 60,
+    "git.ignoreLimitWarning": true,
+    //----------------------------------------------------------------------
+    // LANGUAGE SPECIFICS
+    //----------------------------------------------------------------------
+    "[rust]": {
+        "editor.formatOnSave": true,
+    },
+    "crates.listPreReleases": true,
+}
