@@ -1,6 +1,7 @@
-[package]
-name = "mylog"
-version = "0.1.0"
-edition = "2024"
+[workspace]
+resolver = "3"
+members = ["examples/usage", "mylog"]
 
-[dependencies]
+[workspace.dependencies]
+mylog = { path = "mylog" }
+usage = { path = "examples/usage" }
