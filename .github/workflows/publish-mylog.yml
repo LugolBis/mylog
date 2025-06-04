@@ -18,6 +18,7 @@ jobs:
       - name: Verify README path
         run: |
           # Vérifier que le chemin existe
+          cd mylog
           if [ ! -f "../README.md" ]; then
             echo "❌ ERREUR: README.md introuvable à la racine"
             exit 1
