@@ -3,9 +3,9 @@ name: Publish mylog crate
 on:
   push:
     branches: [main]
-    # Optionnel : déclencher seulement quand mylog change
     paths:
       - 'mylog/**'
+      - 'README.md'  # Déclencher aussi quand le README change
       - '.github/workflows/publish-mylog.yml'
 
 jobs:
@@ -15,18 +15,27 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Verify README path
+        run: |
+          # Vérifier que le chemin existe
+          if [ ! -f "../README.md" ]; then
+            echo "❌ ERREUR: README.md introuvable à la racine"
+            exit 1
+          fi
+
       - name: Install Rust
         uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
-          components: clippy
           profile: minimal
 
-      - name: Run tests for mylog
+      - name: Run tests
         run: cargo test -p mylog
 
-      - name: Publish mylog to crates.io
+      - name: Publish to crates.io
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CRATES_IO_TOKEN }}
         run: |
-          cargo publish -p mylog
+          # Publier depuis le dossier mylog
+          cd mylog
+          cargo publish

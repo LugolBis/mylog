@@ -5,9 +5,10 @@ edition = "2024"
 description = "A minimal Rust crate providing 3 lightweight logging macros to simplify writing log messages to a file."
 repository = "https://github.com/LugolBis/mylog"
 keywords = ["log", "logger"]
-categories = ["logger"]
+categories = ["development-tools::debugging"]
 license = "MIT"
 authors = ["LugolBis", "Altaks"]
+readme = "../README.md"  # Chemin relatif vers le README
 
 [dependencies]
 libc = "0.2.172"
