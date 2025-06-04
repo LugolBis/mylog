@@ -1,3 +1,5 @@
+//! This module implements three macros facilitating logging.
+
 use std::fs::OpenOptions;
 use std::io::Write;
 use std::time::{SystemTime, UNIX_EPOCH};
@@ -6,6 +8,7 @@ use libc::{localtime, strftime, time_t, tm};
 
 const LOG_FILE_PATH: &str = "logs.txt";
 
+/// Write the content in argument in the _LOG_FILE_PATH_ at the root of the project.
 pub fn write_log(content: String) {
     match OpenOptions::new()
         .append(true)
@@ -21,6 +24,7 @@ pub fn write_log(content: String) {
     }
 }
 
+/// Return the current Timestamp.
 pub fn get_time() -> String {
     let system_time = SystemTime::now();
     let duration = system_time.duration_since(UNIX_EPOCH).unwrap();
@@ -47,7 +51,11 @@ pub fn get_time() -> String {
     }
 }
 
+
 #[macro_export]
+/// Format the content in argument like the macro "format!()" <br>
+/// and adding the current Timestamp and the level of to the log file.<br>
+/// This has the following format : \[_TIMESTAMP_] \[INFO] \[_file_:_line_] \[_content_]
 macro_rules! info {
     ($format_str:expr) => {{
         let msg = format!("[{}] [INFO] [{}:{}] : {}\n", $crate::logs::get_time(), file!(), line!(), $format_str);
@@ -60,6 +68,9 @@ macro_rules! info {
 }
 
 #[macro_export]
+/// Format the content in argument like the macro "format!()" <br>
+/// and adding the current Timestamp and the level of to the log file.<br>
+/// This has the following format : \[_TIMESTAMP_] \[WARNING] \[_file_:_line_] \[_content_]
 macro_rules! warn {
     ($format_str:expr) => {{
         let msg = format!("[{}] [WARNING] [{}:{}] : {}\n", $crate::logs::get_time(), file!(), line!(), $format_str);
@@ -72,6 +83,9 @@ macro_rules! warn {
 }
 
 #[macro_export]
+/// Format the content in argument like the macro "format!()" <br>
+/// and adding the current Timestamp and the level of to the log file.<br>
+/// This has the following format : \[_TIMESTAMP_] \[ERROR] \[_file_:_line_] \[_content_]
 macro_rules! error {
     ($format_str:expr) => {{
         let msg = format!("[{}] [ERROR] [{}:{}] : {}\n", $crate::logs::get_time(), file!(), line!(), $format_str);

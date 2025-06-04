@@ -1,6 +1,6 @@
 [package]
 name = "mylog"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2024"
 description = "A minimal Rust crate providing 3 lightweight logging macros to simplify writing log messages to a file."
 repository = "https://github.com/LugolBis/mylog"
