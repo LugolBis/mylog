@@ -2,6 +2,11 @@
 name = "mylog"
 version = "0.1.0"
 edition = "2024"
+description = "A minimal Rust crate providing 3 lightweight logging macros to simplify writing log messages to a file."
+repository = "https://github.com/LugolBis/mylog"
+keywords = ["log", "logger"]
+categories = ["logger"]
+license = "MIT"
 authors = ["LugolBis", "Altaks"]
 
 [dependencies]
