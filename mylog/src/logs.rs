@@ -1,19 +1,40 @@
 //! This module implements three macros facilitating logging.
 
-use std::fs::OpenOptions;
+use std::fs::{self, OpenOptions};
 use std::io::Write;
+use std::path::PathBuf;
 use std::time::{SystemTime, UNIX_EPOCH};
 use std::ffi::CStr;
+use std::env;
 use libc::{localtime, strftime, time_t, tm};
 
-const LOG_FILE_PATH: &str = "logs.txt";
+const LOG_FILE_NAME: &str = "logs.txt";
 
-/// Write the content in argument in the _LOG_FILE_PATH_ at the root of the project.
+/// Init the logs folder path by setting an environment variable called *_MYLOG_DIR_*
+pub fn init(folder_path: String) {
+    if !fs::exists(&folder_path).unwrap_or(false) {
+        let _ = fs::create_dir_all(&folder_path);
+    }
+
+    unsafe {
+        env::set_var("MYLOG_DIR", folder_path);
+    }
+}
+
+/// Get the path to the log file
+pub fn get_log_path() -> PathBuf {
+    let mylog_dir = env::var("MYLOG_DIR").unwrap_or(String::new());
+    let mut path = PathBuf::from(mylog_dir);
+    path.push(LOG_FILE_NAME);
+    path
+}
+
+/// Write the content in argument in the __ at the root of the project.
 pub fn write_log(content: String) {
     match OpenOptions::new()
         .append(true)
         .create(true)
-        .open(LOG_FILE_PATH)
+        .open(get_log_path())
     {
         Ok(mut file) => {
             let _ = file.write_all(content.as_bytes());

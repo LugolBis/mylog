@@ -19,6 +19,9 @@ Each macro:
     - Source file name and line number
 - Writes the formatted message to a log.txt file
 
+> [!NOTE]
+> You can easily set the folder where the log file is saved with the function ```init()```.
+
 ## 🚀 Getting Started
 
 ### 🔧​ Install
@@ -48,9 +51,12 @@ A simple example :
 ```rust
 // A Rust script
 
-use mylog::{error, info, warn};
+use mylog::{error, info, warn, logs::init};
 
 fn main() {
+    // To save the log file in the folder 'path/to/my_logs'
+    init("path/to/mylogs".to_string());
+
     info!("Welcome on MyLog !");
     warn!("Driving too fast is dangerous -> {:#?}", ["car0", "car1"]);
     error!("{} NOT FOUND - We can't find your dignity...", 404);
@@ -66,3 +72,6 @@ This will write the following content in a file `logs.txt` at the root of your p
 ]
 [2025-06-04 23:35:06] [ERROR] [examples/usage/src/main.rs:6] : 404 NOT FOUND - We can't find your dignity...
 ```
+
+> [!NOTE]
+> For performancies prefer the version ```1.0.0```, who's provide less fonctionnalities.
