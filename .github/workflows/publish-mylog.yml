@@ -5,22 +5,27 @@ on:
     branches: [main]
     paths:
       - 'mylog/**'
-      - 'README.md'  # Déclencher aussi quand le README change
+      - 'README.md'
       - '.github/workflows/publish-mylog.yml'
 
 jobs:
-  publish-mylog:
-    runs-on: ubuntu-latest
+  test-mylog:
+    name: Test on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Verify README path
+        shell: bash
         run: |
-          # Vérifier que le chemin existe
           cd mylog
           if [ ! -f "../README.md" ]; then
-            echo "❌ ERREUR: README.md introuvable à la racine"
+            echo "ERROR: README.md not found at root"
             exit 1
           fi
 
@@ -30,13 +35,25 @@ jobs:
           toolchain: stable
           profile: minimal
 
-      - name: Run tests
-        run: cargo test -p mylog
+      - name: Test usage
+        run: cargo run --manifest-path examples/usage/Cargo.toml --verbose
+
+  publish-mylog:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          profile: minimal
 
       - name: Publish to crates.io
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CRATES_IO_TOKEN }}
         run: |
-          # Publier depuis le dossier mylog
+          # Publish from the folder mylog
           cd mylog
           cargo publish

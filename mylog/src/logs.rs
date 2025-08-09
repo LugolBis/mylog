@@ -1,24 +1,70 @@
 //! This module implements three macros facilitating logging.
 
-use std::fs::{self, OpenOptions};
+use std::fs::{self, DirEntry, OpenOptions};
 use std::io::Write;
 use std::path::PathBuf;
-use std::time::{SystemTime, UNIX_EPOCH};
-use std::ffi::CStr;
 use std::env;
-use libc::{localtime, strftime, time_t, tm};
+use std::time::{SystemTime, Duration};
+use rayon::prelude::*;
+
+use crate::utils::*;
 
 const LOG_FILE_NAME: &str = "logs.txt";
 
 /// Init the logs folder path by setting an environment variable called *_MYLOG_DIR_*
-pub fn init(folder_path: String) {
+pub fn init(folder_path: String, file_size: String, duration: String) -> Result<(), String> {
+    let folder_path = PathBuf::from(folder_path);
+
     if !fs::exists(&folder_path).unwrap_or(false) {
-        let _ = fs::create_dir_all(&folder_path);
+        fs::create_dir_all(&folder_path)
+            .map_err(|e| format!(
+                "Failed when try to create the folder : {}\n{}", folder_path.display(), e
+            ))?;
     }
 
+    let size_in_bytes = parse_file_size(&file_size)
+        .ok_or(format!("Invalid file_size : {}", file_size))?;
+    let duration_in_secs = parse_duration(&duration)
+        .ok_or(format!("Invalid duration : {}", duration))?;
+
     unsafe {
-        env::set_var("MYLOG_DIR", folder_path);
+        env::set_var("MYLOG_DIR", &folder_path);
     }
+
+    let entries: Vec<DirEntry> = fs::read_dir(&folder_path)
+        .map_err(|e| format!(
+            "Failed when try to read the directory : {}\n{}", folder_path.display(), e
+        ))?
+        .flatten()
+        .collect();
+
+    let now = SystemTime::now();
+
+    entries.par_iter().for_each(|entry| {
+        let path = entry.path();
+        
+        match path.extension().and_then(|e| e.to_str()).unwrap_or_default() {
+            "txt" => {
+                if let Ok(metadata) = fs::metadata(&path) {
+                    if metadata.len() >= size_in_bytes {
+                        let _ = compress_to_zip(&path, &folder_path);
+                    }
+                }
+            }
+            "zip" => {
+                if let Ok(metadata) = fs::metadata(&path) {
+                    if let Ok(modified) = metadata.modified() {
+                        if now.duration_since(modified).unwrap_or(Duration::ZERO).as_secs() > duration_in_secs
+                        {
+                            let _ = fs::remove_file(path);
+                        }
+                    }
+                }
+            }
+            _ => {}
+        }
+    });
+    Ok(())
 }
 
 /// Get the path to the log file
@@ -45,45 +91,17 @@ pub fn write_log(content: String) {
     }
 }
 
-/// Return the current Timestamp.
-pub fn get_time() -> String {
-    let system_time = SystemTime::now();
-    let duration = system_time.duration_since(UNIX_EPOCH).unwrap();
-    let timestamp = duration.as_secs() as time_t;
-
-    unsafe {
-        let tm_ptr: *mut tm = localtime(&timestamp);
-        let mut buffer = [0u8; 100];
-
-        let format = "%Y-%m-%d %H:%M:%S\0";
-        let len = strftime(
-            buffer.as_mut_ptr() as *mut _,
-            buffer.len(),
-            format.as_ptr() as *const _,
-            tm_ptr,
-        );
-
-        if len > 0 {
-            let cstr = CStr::from_ptr(buffer.as_ptr() as *const _);
-            String::from(cstr.to_str().unwrap_or("~Date~"))
-        } else {
-            String::from("~Date~")
-        }
-    }
-}
-
-
 #[macro_export]
 /// Format the content in argument like the macro "format!()" <br>
 /// and adding the current Timestamp and the level of to the log file.<br>
 /// This has the following format : \[_TIMESTAMP_] \[INFO] \[_file_:_line_] \[_content_]
 macro_rules! info {
     ($format_str:expr) => {{
-        let msg = format!("[{}] [INFO] [{}:{}] : {}\n", $crate::logs::get_time(), file!(), line!(), $format_str);
+        let msg = format!("[{}] [INFO] [{}:{}] : {}\n", $crate::utils::get_time(), file!(), line!(), $format_str);
         $crate::logs::write_log(msg);
     }};
     ($format_str:expr, $($arg:tt)*) => {{
-        let msg = format!("[{}] [INFO] [{}:{}] : {}\n", $crate::logs::get_time(), file!(), line!(), format!($format_str, $($arg)*));
+        let msg = format!("[{}] [INFO] [{}:{}] : {}\n", $crate::utils::get_time(), file!(), line!(), format!($format_str, $($arg)*));
         $crate::logs::write_log(msg);
     }};
 }
@@ -94,11 +112,11 @@ macro_rules! info {
 /// This has the following format : \[_TIMESTAMP_] \[WARNING] \[_file_:_line_] \[_content_]
 macro_rules! warn {
     ($format_str:expr) => {{
-        let msg = format!("[{}] [WARNING] [{}:{}] : {}\n", $crate::logs::get_time(), file!(), line!(), $format_str);
+        let msg = format!("[{}] [WARNING] [{}:{}] : {}\n", $crate::utils::get_time(), file!(), line!(), $format_str);
         $crate::logs::write_log(msg);
     }};
     ($format_str:expr, $($arg:tt)*) => {{
-        let msg = format!("[{}] [WARNING] [{}:{}] : {}\n", $crate::logs::get_time(), file!(), line!(), format!($format_str, $($arg)*));
+        let msg = format!("[{}] [WARNING] [{}:{}] : {}\n", $crate::utils::get_time(), file!(), line!(), format!($format_str, $($arg)*));
         $crate::logs::write_log(msg);
     }};
 }
@@ -109,11 +127,11 @@ macro_rules! warn {
 /// This has the following format : \[_TIMESTAMP_] \[ERROR] \[_file_:_line_] \[_content_]
 macro_rules! error {
     ($format_str:expr) => {{
-        let msg = format!("[{}] [ERROR] [{}:{}] : {}\n", $crate::logs::get_time(), file!(), line!(), $format_str);
+        let msg = format!("[{}] [ERROR] [{}:{}] : {}\n", $crate::utils::get_time(), file!(), line!(), $format_str);
         $crate::logs::write_log(msg);
     }};
     ($format_str:expr, $($arg:tt)*) => {{
-        let msg = format!("[{}] [ERROR] [{}:{}] : {}\n", $crate::logs::get_time(), file!(), line!(), format!($format_str, $($arg)*));
+        let msg = format!("[{}] [ERROR] [{}:{}] : {}\n", $crate::utils::get_time(), file!(), line!(), format!($format_str, $($arg)*));
         $crate::logs::write_log(msg);
     }};
 }

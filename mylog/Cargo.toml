@@ -1,6 +1,6 @@
 [package]
 name = "mylog"
-version = "0.1.3"
+version = "0.1.4"
 edition = "2024"
 description = "A minimal Rust crate providing 3 lightweight logging macros to simplify writing log messages to a file."
 repository = "https://github.com/LugolBis/mylog"
@@ -11,4 +11,7 @@ authors = ["LugolBis", "Altaks"]
 readme = "../README.md"  # Path to the README
 
 [dependencies]
+chrono = "0.4.41"
 libc = "0.2.172"
+rayon = "1.10.0"
+zip = "4.3.0"
